@@ -24,11 +24,14 @@ const TransactionList = ({ transactions, onEdit, onDelete, loading }) => {
   const [filters, setFilters] = useState({
     search: '', type: '', category: '', startDate: '', endDate: '',
   });
+  const [sortBy, setSortBy] = useState('date-desc');
 
   const handleChange = (e) => setFilters({ ...filters, [e.target.name]: e.target.value });
 
-  const clearFilters = () =>
+  const clearFilters = () => {
     setFilters({ search: '', type: '', category: '', startDate: '', endDate: '' });
+    setSortBy('date-desc');
+  };
 
   const filtered = transactions.filter(t => {
     const mSearch = filters.search
@@ -43,7 +46,27 @@ const TransactionList = ({ transactions, onEdit, onDelete, loading }) => {
     return mSearch && mType && mCat && mStart && mEnd;
   });
 
-  const hasFilters = Object.values(filters).some(v => v !== '');
+  const sorted = [...filtered].sort((a, b) => {
+    if (sortBy === 'date-desc') {
+      const dateDiff = new Date(b.date) - new Date(a.date);
+      if (dateDiff !== 0) return dateDiff;
+      return new Date(b.createdAt || 0) - new Date(a.createdAt || 0);
+    }
+    if (sortBy === 'date-asc') {
+      const dateDiff = new Date(a.date) - new Date(b.date);
+      if (dateDiff !== 0) return dateDiff;
+      return new Date(a.createdAt || 0) - new Date(b.createdAt || 0);
+    }
+    if (sortBy === 'amount-desc') {
+      return b.amount - a.amount;
+    }
+    if (sortBy === 'amount-asc') {
+      return a.amount - b.amount;
+    }
+    return 0;
+  });
+
+  const hasFilters = Object.values(filters).some(v => v !== '') || sortBy !== 'date-desc';
 
   const fmtAmt = (n) => new Intl.NumberFormat('en-IN', {
     style: 'currency', currency: 'INR', minimumFractionDigits: 0, maximumFractionDigits: 0,
@@ -65,7 +88,7 @@ const TransactionList = ({ transactions, onEdit, onDelete, loading }) => {
           background: 'var(--bg)', border: '1px solid var(--border)',
           padding: '3px 10px', borderRadius: 100
         }}>
-          {filtered.length} records
+          {sorted.length} records
         </span>
       </div>
 
@@ -91,6 +114,15 @@ const TransactionList = ({ transactions, onEdit, onDelete, loading }) => {
         </select>
         <input id="filter-start-date" type="date" name="startDate" className="form-input" value={filters.startDate} onChange={handleChange} />
         <input id="filter-end-date" type="date" name="endDate" className="form-input" value={filters.endDate} onChange={handleChange} />
+        
+        {/* Sort Select Dropdown */}
+        <select id="sort-by" name="sortBy" className="form-select" value={sortBy} onChange={(e) => setSortBy(e.target.value)}>
+          <option value="date-desc">Latest First</option>
+          <option value="date-asc">Oldest First</option>
+          <option value="amount-desc">Amount: High to Low</option>
+          <option value="amount-asc">Amount: Low to High</option>
+        </select>
+
         {hasFilters && (
           <button className="btn btn-ghost btn-sm" onClick={clearFilters}>✕ Clear</button>
         )}
@@ -101,7 +133,7 @@ const TransactionList = ({ transactions, onEdit, onDelete, loading }) => {
       {/* List */}
       {loading ? (
         <div className="spinner" />
-      ) : filtered.length === 0 ? (
+      ) : sorted.length === 0 ? (
         <div className="empty">
           <div className="empty-icon">🔍</div>
           <h3>No transactions found</h3>
@@ -109,7 +141,7 @@ const TransactionList = ({ transactions, onEdit, onDelete, loading }) => {
         </div>
       ) : (
         <div>
-          {filtered.map(t => {
+          {sorted.map(t => {
             const color = CAT_COLOR[t.category] || '#bdbdbd';
             return (
               <div key={t._id} className="tx-item">
