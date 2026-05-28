@@ -6,7 +6,7 @@ A web-based personal finance tracker where users can record income and expenses,
 
 ## 🚀 Live Demo
 
-> _Add your live deployment URL here after deploying_
+> 🌐 **Live App:** [https://jaypee-assg.vercel.app](https://jaypee-assg.vercel.app)
 
 ---
 
@@ -204,4 +204,4 @@ The app will run at `http://localhost:3000`
 
 ## 👤 Author
 
-Your Name — [GitHub](https://github.com/YOUR_USERNAME)
+Varun — [GitHub](https://github.com/Varun0513)
