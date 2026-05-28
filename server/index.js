@@ -6,15 +6,7 @@ const cors = require('cors');
 
 const app = express();
 
-const allowedOrigins = [
-  'http://localhost:3000',
-  process.env.CLIENT_URL,
-].filter(Boolean);
-
-app.use(cors({
-  origin: allowedOrigins,
-  credentials: true,
-}));
+app.use(cors());
 app.use(express.json());
 
 app.use('/api/auth', require('./routes/auth'));
